@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-gcc -g -o main main.c -I./cvc5/include -L./cvc5/lib -lcvc5 -Wl,-rpath,./cvc5/lib
-
