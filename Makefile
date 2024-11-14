@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -g -I./cvc5/include
 LDFLAGS = -L./cvc5/lib -lcvc5 -Wl,-rpath,./cvc5/lib
-SRC = main.c
+SRC = src/*.c
 OUT_DIR = bin
 OUT = $(OUT_DIR)/main
 
