@@ -28,7 +28,7 @@ struct rgol {
 // - 1: erro
 int rgol_init(struct rgol* r);
 
-// rgol_make_formula monta as fórmulas que vão ir para o SAT.
+// rgol_make_formula monta as fórmulas que vão ir para o SAT solver.
 void rgol_make_formulas(struct rgol* r);
 
 // rgol_destroy libera os recursos.

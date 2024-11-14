@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define DEBUG 1
+#include "utils.h"
 
 void print_debug(const char *message) {
 	if (DEBUG) {
