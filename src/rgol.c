@@ -214,7 +214,7 @@ void rgol_make_formulas(struct rgol* r) {
 				args[1] = r->three;
 				// sum == 3
 				formula[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, args);
-				// (t0[i][j] == 1) and (sum == 2) or (sum == 3)
+				// ((t0[i][j] == 1) and (sum == 2)) or (sum == 3)
 				c = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, formula);
 			}
 			cvc5_assert_formula(r->slv, c);
