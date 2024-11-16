@@ -37,18 +37,19 @@ int rgol_init(struct rgol* r) {
 	r->two = cvc5_mk_integer_int64(r->tm, 2);
 	r->three = cvc5_mk_integer_int64(r->tm, 3);
 
-	Cvc5Sort int_sort = cvc5_get_integer_sort(r->tm);
 	char name[20];
 	for (int i = 0; i < r->lin * r->col; i++) {
 		sprintf(name, "x%d", i);
-		r->board_t0[i] = cvc5_mk_const(r->tm, int_sort, name);
+		r->board_t0[i] = cvc5_mk_const(r->tm, cvc5_get_integer_sort(r->tm), name);
 
-		// T0[i] == 0
-		Cvc5Term zero_constraint = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, (Cvc5Term[]){r->board_t0[i], r->zero});
-		// T0[i] == 1
-		Cvc5Term one_constraint = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, (Cvc5Term[]){r->board_t0[i], r->one});
-		// (T0[i] == 0) or (T0[i] == 1)
-		Cvc5Term constraint = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, (Cvc5Term[]){zero_constraint, one_constraint});
+		// t0 == 0 or t0 == 1
+		Cvc5Term exp[2], arg[2];
+		arg[0] = r->board_t0[i];
+		arg[1] = r->zero;
+		exp[0] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, arg);
+		arg[1] = r->one;
+		exp[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, arg);
+		Cvc5Term constraint = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, exp);
 
 		cvc5_assert_formula(r->slv, constraint);
 	}
@@ -92,19 +93,22 @@ void handle_board_edges(struct rgol* r) {
 					sum[2] = r->board_t0[i*r->col-2];
 				}
 			}
-			Cvc5Term args[2];
-			args[0] = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 3, sum);
-			Cvc5Term formula[2];
-			args[1] = r->two;
-			Cvc5Term aux[2] = {r->board_t0[i*r->col+j], r->one};
-			aux[0] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, aux);
-			aux[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2 , args);
-			Cvc5Term and[1] = {cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, aux)};
-			formula[0] = cvc5_mk_term(r->tm, CVC5_KIND_NOT, 1, and);
-			args[1] = r->three;
-			formula[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, args);
-			Cvc5Term c = cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, formula);
-			cvc5_assert_formula(r->slv, c);
+			Cvc5Term arg[2], exp[2], constraint1, constraint2;
+
+			// t0 != 1 OR sum != 2
+			arg[0] = r->board_t0[i*r->col + j];
+			arg[1] = r->one;
+			exp[0] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			arg[0] = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 3, sum);
+			arg[1] = r->two;
+			exp[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			constraint1 = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, exp);
+			cvc5_assert_formula(r->slv, constraint1);
+
+			// sum != 3
+			arg[1] = r->three;
+			constraint2 = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			cvc5_assert_formula(r->slv, constraint2);
 		}
 	}
 	for (int j = 1; j < r->col-1; j++){
@@ -126,19 +130,22 @@ void handle_board_edges(struct rgol* r) {
 				sum[3] = r->board_t0[(i-1)*r->col+j];
 				sum[4] = r->board_t0[(i-1)*r->col+j+1];
 			}
-			Cvc5Term args[2];
-			args[0] = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 5, sum);
-			Cvc5Term formula[2];
-			args[1] = r->two;
-			Cvc5Term aux[2] = {r->board_t0[i*r->col+j], r->one};
-			aux[0] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, aux);
-			aux[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2 , args);
-			Cvc5Term and[1] = {cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, aux)};
-			formula[0] = cvc5_mk_term(r->tm, CVC5_KIND_NOT, 1, and);
-			args[1] = r->three;
-			formula[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, args);
-			Cvc5Term c = cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, formula);
-			cvc5_assert_formula(r->slv, c);
+			Cvc5Term arg[2], exp[2], constraint1, constraint2;
+
+			// t0 != 1 OR sum != 2
+			arg[0] = r->board_t0[i*r->col + j];
+			arg[1] = r->one;
+			exp[0] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			arg[0] = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 5, sum);
+			arg[1] = r->two;
+			exp[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			constraint1 = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, exp);
+			cvc5_assert_formula(r->slv, constraint1);
+
+			// sum != 3
+			arg[1] = r->three;
+			constraint2 = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			cvc5_assert_formula(r->slv, constraint2);
 		}
 	}
 	for (int i = 1; i < r->lin - 1; i++){
@@ -160,19 +167,22 @@ void handle_board_edges(struct rgol* r) {
 				sum[3] = r->board_t0[(i+1)*r->col+j-1];
 				sum[4] = r->board_t0[(i+1)*r->col+j];
 			}
-			Cvc5Term args[2];
-			args[0] = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 5, sum);
-			Cvc5Term formula[2];
-			args[1] = r->two;
-			Cvc5Term aux[2] = {r->board_t0[i*r->col+j], r->one};
-			aux[0] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, aux);
-			aux[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2 , args);
-			Cvc5Term and[1] = {cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, aux)};
-			formula[0] = cvc5_mk_term(r->tm, CVC5_KIND_NOT, 1, and);
-			args[1] = r->three;
-			formula[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, args);
-			Cvc5Term c = cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, formula);
-			cvc5_assert_formula(r->slv, c);
+			Cvc5Term arg[2], exp[2], constraint1, constraint2;
+
+			// t0 != 1 OR sum != 2
+			arg[0] = r->board_t0[i*r->col + j];
+			arg[1] = r->one;
+			exp[0] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			arg[0] = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 5, sum);
+			arg[1] = r->two;
+			exp[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			constraint1 = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, exp);
+			cvc5_assert_formula(r->slv, constraint1);
+
+			// sum != 3
+			arg[1] = r->three;
+			constraint2 = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+			cvc5_assert_formula(r->slv, constraint2);
 		}
 	}
 }
@@ -181,43 +191,46 @@ __always_inline
 void rgol_make_formulas(struct rgol* r) {
 	for (int i = 1; i < r->lin - 1; i++) {
 		for (int j = 1; j < r->col - 1; j++) {
-			Cvc5Term sum[8] = {
+			Cvc5Term sum_vec[8] = {
 				r->board_t0[(i-1)*r->col+j], r->board_t0[(i-1)*r->col+j-1], r->board_t0[(i-1)*r->col+j+1],
 			 	r->board_t0[i*r->col+j-1],                                  r->board_t0[i*r->col+j+1],
 			 	r->board_t0[(i+1)*r->col+j], r->board_t0[(i+1)*r->col+j-1], r->board_t0[(i+1)*r->col+j+1]
 			};
-
-			Cvc5Term args[2];
-			args[0] = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 8, sum);
-			args[1] = r->two;
-
-			Cvc5Term aux[2] = {r->board_t0[i*r->col+j], r->one};
-			// t0[i][j] == 1
-			aux[0] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, aux);
-			// sum == 2
-			aux[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2 , args);
-
-			Cvc5Term formula[2], c;
+			Cvc5Term sum = cvc5_mk_term(r->tm, CVC5_KIND_ADD, 8, sum_vec);
+			Cvc5Term arg[2], exp[2];
+			Cvc5Term constraint1, constraint2;
 			if (r->board_t1[i*r->col + j] == 0) {
-				// (t0[i][j] == 1) and (sum == 2)
-				Cvc5Term and[1] = {cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, aux)};
-				// !((t0[i][j] == 1) and (sum == 2))
-				formula[0] = cvc5_mk_term(r->tm, CVC5_KIND_NOT, 1, and);
-				args[1] = r->three;
+				// t0 != 1 OR sum != 2
+				arg[0] = r->board_t0[i*r->col + j];
+				arg[1] = r->one;
+				exp[0] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+				arg[0] = sum;
+				arg[1] = r->two;
+				exp[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
+				constraint1 = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, exp);
+
 				// sum != 3
-				formula[1] = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, args);
-				// !((t0[i][j] == 1) and (sum == 2)) and (sum != 3)
-				c = cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, formula);
+				arg[1] = r->three;
+				constraint2 = cvc5_mk_term(r->tm, CVC5_KIND_DISTINCT, 2, arg);
 			} else {
-				// (t0[i][j] == 1) and (sum == 2)
-				formula[0] = cvc5_mk_term(r->tm, CVC5_KIND_AND, 2, aux);
-				args[1] = r->three;
-				// sum == 3
-				formula[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, args);
-				// ((t0[i][j] == 1) and (sum == 2)) or (sum == 3)
-				c = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, formula);
+				// t0 == 1 OR sum == 3
+				arg[0] = r->board_t0[i*r->col + j];
+				arg[1] = r->one;
+				exp[0] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, arg);
+				arg[0] = sum;
+				arg[1] = r->three;
+				exp[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, arg);
+				constraint1 = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, exp);
+
+				// sum == 2 OR sum == 3
+				arg[1] = r->two;
+				exp[0] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, arg);
+				arg[1] = r->three;
+				exp[1] = cvc5_mk_term(r->tm, CVC5_KIND_EQUAL, 2, arg);
+				constraint2 = cvc5_mk_term(r->tm, CVC5_KIND_OR, 2, exp);
 			}
-			cvc5_assert_formula(r->slv, c);
+			cvc5_assert_formula(r->slv, constraint1);
+			cvc5_assert_formula(r->slv, constraint2);
 		}
 	}
 
