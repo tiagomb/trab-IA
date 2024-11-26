@@ -76,9 +76,18 @@ using namespace openwbo;
 //=================================================================================================
 
 static MaxSAT *mxsolver;
+int lin, col;
 
 static void SIGINT_exit(int signum) {
-  mxsolver->printAnswer(_UNKNOWN_);
+  for (int i = 0; i < lin; i++){
+      for (int j = 0; j < col; j++){
+        if (mxsolver->getValue(i*col+j) < 1)
+          printf ("0 ");
+        else
+          printf ("1 ");
+      }
+      printf ("\n");
+    }
   exit(_UNKNOWN_);
 }
 
@@ -194,7 +203,7 @@ int main(int argc, char **argv) {
     signal(SIGTERM, SIGINT_exit);
 
     MaxSATFormula *maxsat_formula = new MaxSATFormula();
-    int lin, col;
+
     scanf ("%d", &lin);
     scanf ("%d", &col);
     int board_t1[lin*col];
