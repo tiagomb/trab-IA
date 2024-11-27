@@ -79,7 +79,8 @@ static MaxSAT *mxsolver;
 int lin, col;
 
 static void SIGINT_exit(int signum) {
-  for (int i = 0; i < lin; i++){
+  if (mxsolver->getValue(1) != 0){
+    for (int i = 0; i < lin; i++){
       for (int j = 0; j < col; j++){
         if (mxsolver->getValue(i*col+j) < 1)
           printf ("0 ");
@@ -88,6 +89,7 @@ static void SIGINT_exit(int signum) {
       }
       printf ("\n");
     }
+  }
   exit(_UNKNOWN_);
 }
 
@@ -555,6 +557,10 @@ int main(int argc, char **argv) {
     mxsolver = S;
     mxsolver->setPrint(true);
     int ret = (int)mxsolver->search();
+    if (mxsolver->getValue(1) == 0){ //Unsat
+      delete S;
+      return 0;
+    }
     for (int i = 0; i < lin; i++){
       for (int j = 0; j < col; j++){
         if (mxsolver->getValue(i*col+j) < 1)
