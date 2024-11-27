@@ -2,3 +2,7 @@ root = true
 
 [*.c]
 indent_style = tabs
+
+[*.txt]
+indent_style = space
+indent_size = 4
