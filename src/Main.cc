@@ -78,7 +78,7 @@ using namespace openwbo;
 static MaxSAT *mxsolver;
 int lin, col;
 
-static void SIGINT_exit(int signum) {
+static void SIGINT_exit(int signum) { //Modified to print solution when the time limit exceeds
   if (mxsolver->getValue(1) != 0){
     for (int i = 0; i < lin; i++){
       for (int j = 0; j < col; j++){
@@ -546,6 +546,8 @@ int main(int argc, char **argv) {
 		addLiterals(maxsat_formula, {mkLit(i*col-1, false), mkLit(i*col-2, true), mkLit((i+1)*col-2, false), mkLit((i+2)*col-2, true), mkLit((i+2)*col-1, true)});
 		addLiterals(maxsat_formula, {mkLit(i*col-1, false), mkLit(i*col-2, false), mkLit((i+1)*col-2, true), mkLit((i+2)*col-2, true), mkLit((i+2)*col-1, true)}); 
 	}
+
+	//Adding soft clauses to minimize the number of alive cells
 	for (int i = 0; i < lin*col; i++){
 		vec<Lit> clause;
 		clause.push(mkLit(i, true));
@@ -558,17 +560,17 @@ int main(int argc, char **argv) {
 	mxsolver = S;
 	mxsolver->setPrint(true);
 	int ret = (int)mxsolver->search();
-	if (mxsolver->getValue(1) != 0){
-    for (int i = 0; i < lin; i++){
-      for (int j = 0; j < col; j++){
-        if (mxsolver->getValue(i*col+j) < 1)
-          printf ("0 ");
-        else
-          printf ("1 ");
-      }
-      printf ("\n");
-    }
-  }
+	if (mxsolver->getValue(1) != 0){ //If a solution is found, print it
+    		for (int i = 0; i < lin; i++){
+      			for (int j = 0; j < col; j++){
+        			if (mxsolver->getValue(i*col+j) < 1)
+          				printf ("0 ");
+        			else
+          				printf ("1 ");
+      			}
+     			 printf ("\n");
+    		}
+  	}
 	delete S;
 	return 0;
 } 
