@@ -57,6 +57,8 @@ Dependências:
 
     Nesse caso, todas as 8 permutações de 7 vizinhos possíveis foram consideradas, com todas as variáveis não negadas, o que é representado pelo parâmetro "false" (a variável normal ser indicada por "false" e a negada por "true" é um pouco contraintuitivo, porém é a convenção utilizada)
 
+-   Além disso, para minimizar as células vivas, adicionamos "soft clauses" correspondentes às células do tabuleiro negadas. Como o OpenWBO é um MaxSAT, ele tenta maximizar o número de "soft clauses" verdadeiras (ou seja, o número de células mortas, e, consequentemente, minimizar o número de células vivas).
+
 -   Para contemplar as bordas, as regras para células mortas foram aplicadas considerando o número de vizinhos. Cada 1 dos 4 cantos possui 3 vizinhos, enquanto as  demais células possuem 5 vizinhos.
 
 -   O SAT solver utilizado "por debaixo dos panos" é o Glucose, a opção padrão. Testes realizados com os outros solvers disponíveis não demonstraram diferenças significativas.
