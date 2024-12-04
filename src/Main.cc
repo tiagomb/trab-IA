@@ -80,6 +80,7 @@ int lin, col;
 
 static void SIGINT_exit(int signum) { //Modified to print solution when the time limit exceeds
   if (mxsolver->getValue(1) != 0){
+	printf("%d %d\n", lin, col);
     for (int i = 0; i < lin; i++){
       for (int j = 0; j < col; j++){
         if (mxsolver->getValue(i*col+j) < 1)
@@ -89,8 +90,10 @@ static void SIGINT_exit(int signum) { //Modified to print solution when the time
       }
       printf ("\n");
     }
+  } else {
+	printf ("Unsat\n");
   }
-  exit(_UNKNOWN_);
+  exit(0);
 }
 
 //=================================================================================================
@@ -170,7 +173,7 @@ int main(int argc, char **argv) {
 			IntRange(0, 1));
 
 	IntOption cpu_lim("Open-WBO", "cpu-lim",
-			"Limit on CPU time allowed in seconds.\n", 300,
+			"Limit on CPU time allowed in seconds.\n", 295,
 			IntRange(0, INT32_MAX));
 
 	IntOption mem_lim("Open-WBO", "mem-lim",
@@ -558,9 +561,10 @@ int main(int argc, char **argv) {
 		S->loadFormula(maxsat_formula);
 	S->setInitialTime(initial_time);
 	mxsolver = S;
-	mxsolver->setPrint(true);
+	mxsolver->setPrint(false);
 	int ret = (int)mxsolver->search();
 	if (mxsolver->getValue(1) != 0){ //If a solution is found, print it
+			printf("%d %d\n", lin, col);
     		for (int i = 0; i < lin; i++){
       			for (int j = 0; j < col; j++){
         			if (mxsolver->getValue(i*col+j) < 1)
@@ -570,6 +574,8 @@ int main(int argc, char **argv) {
       			}
      			 printf ("\n");
     		}
+  	} else {
+		printf ("Unsat\n");
   	}
 	delete S;
 	return 0;

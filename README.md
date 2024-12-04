@@ -68,22 +68,9 @@ Dependências:
 -   Além de tentar encontrar uma valoração que satisfaça as restrições, o
     algoritmo paraleliza a busca a fim de encontrar uma valoração que minimize o
     número de células vivas.
--   Depois de 300 segundos, ele imprime a melhor
-    solução encontrada.
+-   Um limite de 295 segundos (4m55s) foi colocado, caso ultrapasse esse tempo, o programa retorna a melhor solução encontrada. A decisão de retirar 5 segundos do limite estabelecido no enunciado foi baseada em testes, nos quais o programa ultrassava um pouco o tempo definido. Assim, é garantido que uma solução será impressa em até 5 minutos.
 
 ## Saída do programa
 
-O OpenWBO segue o padrão de saída dos MaxSAT solvers:
--   "c" para comentários.
--   "s" para status da solução.
-    - OPTIMUM FOUND
-    - UNSATISFIABLE
-    - SATISFIABLE
--   "o" para o custo da solução.
-    
-    Aqui o custo da solução é a quantidade de células vivas. Assim, quanto
-    menor o custo, menor a quantidade de células vivas.
-
--   Por fim, a matriz em T0 é impressa.
-
+-   A saída do programa segue o formato da entrada. Primeiro as linhas e colunas, e em seguida a matriz resultado, com 0 representando células mortas e 1 representando as vivas.
 
