@@ -79,20 +79,25 @@ static MaxSAT *mxsolver;
 int lin, col;
 
 static void SIGINT_exit(int signum) { //Modified to print solution when the time limit exceeds
-  if (mxsolver->getValue(1) != 0){
 	printf("%d %d\n", lin, col);
-    for (int i = 0; i < lin; i++){
-      for (int j = 0; j < col; j++){
-        if (mxsolver->getValue(i*col+j) < 1)
-          printf ("0 ");
-        else
-          printf ("1 ");
-      }
-      printf ("\n");
-    }
-  } else {
-	printf ("Unsat\n");
-  }
+	if (mxsolver->getValue(1) != 0){
+		for (int i = 0; i < lin; i++){
+			for (int j = 0; j < col; j++){
+				if (mxsolver->getValue(i*col+j) < 1)
+					printf ("0 ");
+				else
+					printf ("1 ");
+			}
+			printf ("\n");
+		}
+	} else {
+		for (int i = 0; i < lin; i++){
+			for (int j = 0; j < col; j++){
+				printf ("0 ");
+			}
+			printf ("\n");
+		}
+	}
   exit(0);
 }
 
@@ -563,20 +568,25 @@ int main(int argc, char **argv) {
 	mxsolver = S;
 	mxsolver->setPrint(false);
 	int ret = (int)mxsolver->search();
-	if (mxsolver->getValue(1) != 0){ //If a solution is found, print it
-			printf("%d %d\n", lin, col);
-    		for (int i = 0; i < lin; i++){
-      			for (int j = 0; j < col; j++){
-        			if (mxsolver->getValue(i*col+j) < 1)
-          				printf ("0 ");
-        			else
-          				printf ("1 ");
-      			}
-     			 printf ("\n");
-    		}
-  	} else {
-		printf ("Unsat\n");
-  	}
+	printf("%d %d\n", lin, col);
+	if (mxsolver->getValue(1) != 0){
+		for (int i = 0; i < lin; i++){
+			for (int j = 0; j < col; j++){
+				if (mxsolver->getValue(i*col+j) < 1)
+					printf ("0 ");
+				else
+					printf ("1 ");
+			}
+			printf ("\n");
+		}
+	} else {
+		for (int i = 0; i < lin; i++){
+			for (int j = 0; j < col; j++){
+				printf ("0 ");
+			}
+			printf ("\n");
+		}
+	}
 	delete S;
 	return 0;
 } 
